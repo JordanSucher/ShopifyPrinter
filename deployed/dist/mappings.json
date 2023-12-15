@@ -1,0 +1,12 @@
+[
+    {
+        "Product Name":"Book 1", 
+        "Cover PDF": "cover1.pdf", 
+        "Book PDF": "book1.pdf"
+    }, 
+    {
+        "Product Name": "Book 2", 
+        "Cover PDF": "cover2.pdf", 
+        "Book PDF": "book2.pdf"
+    }
+]
