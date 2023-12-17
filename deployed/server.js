@@ -15,6 +15,9 @@ app.get('/', (req, res) => {
 })
 
 app.post('/api/orders', async (req, res) => {
+
+    console.log("received order webhook")
+    console.log("body", req.body)
     const order = req.body
     const lineItems = order["line_items"]
 
