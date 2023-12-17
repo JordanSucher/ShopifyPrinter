@@ -21,28 +21,33 @@ app.post('/api/orders', async (req, res) => {
     const order = req.body
     const lineItems = order["line_items"]
 
-    for (let i = 0; i < lineItems.length; i++) {
-
-        if (lineItems[i].requires_shipping == 'true') {
-                const data = {
-                    sku: lineItems[i].sku,
-                    productName: lineItems[i].name,
-                    lineItemId: lineItems[i].id,
-                    orderId: order.id,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                }
-
-                for (let j = 0; j < lineItems[i].quantity; j++) {
-                    await prisma.PrintJob.create({
-                        data
-                    })
-                }
-
+    try {
+        for (let i = 0; i < lineItems.length; i++) {
+    
+            if (lineItems[i].requires_shipping == 'true') {
+                    const data = {
+                        sku: lineItems[i].sku,
+                        productName: lineItems[i].name,
+                        lineItemId: lineItems[i].id,
+                        orderId: order.id,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    }
+    
+                    for (let j = 0; j < lineItems[i].quantity; j++) {
+                        await prisma.PrintJob.create({
+                            data
+                        })
+                    }
+    
+            }
         }
+    
+        res.json({success: true})
+    } catch (error) {
+        console.error(error, error.message);
+        res.status(500).send('Error saving PDF file in the database');
     }
-
-    res.json({success: true})
 })
 
 app.get('/api/productfile', async (req, res) => {
