@@ -43,11 +43,13 @@ model Printer {
 
 model PrintJob {
   id        Int @id @default(autoincrement())
+  sku          String
   productName   String
-  OrderId       Int
-  Status        Status @default(PENDING)
-  CreatedAt     DateTime
-  UpdatedAt     DateTime
+  lineItemId    Int
+  orderId       Int
+  status        Status @default(PENDING)
+  createdAt     DateTime
+  updatedAt     DateTime
 }
 
 enum Status {
