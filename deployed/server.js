@@ -24,7 +24,7 @@ app.post('/api/orders', async (req, res) => {
 
     try {
         for (let i = 0; i < lineItems.length; i++) {
-            console.log("Requires shipping?", lineItems[i]["requires_shipping"])
+            console.log("Requires shipping?", lineItems[i]["requires_shipping"], lineItems[i]["requires_shipping"] == 'true')
 
     
             if (lineItems[i]["requires_shipping"] == 'true') {
