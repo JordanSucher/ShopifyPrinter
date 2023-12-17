@@ -20,8 +20,12 @@ app.post('/api/orders', async (req, res) => {
     const order = req.body
     const lineItems = order["line_items"]
 
+    console.log("length of line items", lineItems.length)
+
     try {
         for (let i = 0; i < lineItems.length; i++) {
+            console.log("Requires shipping?", lineItems[i]["requires_shipping"])
+
     
             if (lineItems[i]["requires_shipping"] == 'true') {
                     const data = {
