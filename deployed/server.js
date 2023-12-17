@@ -17,14 +17,13 @@ app.get('/', (req, res) => {
 app.post('/api/orders', async (req, res) => {
 
     console.log("received order webhook")
-    console.log("body", req.body)
     const order = req.body
     const lineItems = order["line_items"]
 
     try {
         for (let i = 0; i < lineItems.length; i++) {
     
-            if (lineItems[i].requires_shipping == 'true') {
+            if (lineItems[i]["requires_shipping"] == 'true') {
                     const data = {
                         sku: lineItems[i].sku,
                         productName: lineItems[i].name,
