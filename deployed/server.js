@@ -32,6 +32,8 @@ app.post('/api/orders', async (req, res) => {
                         createdAt: new Date(),
                         updatedAt: new Date()
                     }
+
+                    console.log("data for print job", data)
     
                     for (let j = 0; j < lineItems[i].quantity; j++) {
                         await prisma.PrintJob.create({
