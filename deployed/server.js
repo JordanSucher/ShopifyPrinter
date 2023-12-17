@@ -28,6 +28,8 @@ app.post('/api/orders', async (req, res) => {
 
     
             if (lineItems[i]["requires_shipping"] == 'true') {
+                    console.log("starting order processing")
+
                     const data = {
                         sku: lineItems[i].sku,
                         productName: lineItems[i].name,
@@ -38,8 +40,10 @@ app.post('/api/orders', async (req, res) => {
                     }
 
                     console.log("data for print job", data)
-    
-                    for (let j = 0; j < lineItems[i].quantity; j++) {
+                    
+                    let q = parseInt(lineItems[i].quantity);
+                    for (let j = 0; j < q; j++) {
+                        console.log("Adding print job")
                         await prisma.PrintJob.create({
                             data
                         })
