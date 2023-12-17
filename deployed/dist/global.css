@@ -42,6 +42,10 @@ td{
     padding: 3px 10px;
 }
 
+.SmallButton:focus{
+    outline: none;
+}
+
 .SmallButton:hover{
     background-color: darkblue;
     cursor: pointer;

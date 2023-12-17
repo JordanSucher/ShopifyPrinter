@@ -53,14 +53,17 @@ export default function PrinterMapping() {
                     <span key={printer.id} className="flex grow items-center">
                         <div key={printer.id} className="flex grow bg-white p-4 rounded-lg justify-between items-center min-w-[400px]">
                             <p className="font-bold">{printer.name}</p>
-                            {printer.files.map(file => (
-                                <span className="flex items-center">
-                                    <p key={file.id}>{file.name}</p>
-                                    <Cross2Icon className='w-5 h-5 p-1 m-1 rounded-lg hover:cursor-pointer hover:bg-gray-300' 
-                                    onClick={(e)=>handleUnassign(e, printer, file)}/>
-                                </span>
-                            ))}
-                            {/* <button className="SmallButton">Attach File</button> */}
+                            <div className="flex flex-wrap items-center gap-2">
+                                {printer.files.length > 0 && <p className="font-bold">Files attached to this printer: </p>}
+                                {printer.files.map(file => (
+                                    <span className="flex justify-center items-center bg-blue-300 px-2 py-1 gap-2 rounded-full">
+                                        <p className="ml-2" key={file.id}>{file.name}</p>
+                                        <Cross2Icon className='w-5 h-5 p-1 rounded-full hover:cursor-pointer hover:bg-blue-400' 
+                                        onClick={(e)=>handleUnassign(e, printer, file)}/>
+                                    </span>
+                                ))}
+                                {/* <button className="SmallButton">Attach File</button> */}
+                            </div>
                             <span className="flex items-center">
                                 <AttachFileButton printer={printer} getPrinters={getPrinters}/>
                                 <Cross2Icon 

@@ -27,7 +27,7 @@ model File {
 model ProductFile {
   productId Int
   fileId    Int
-  product   Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   file      File @relation(fields: [fileId], references: [id]) 
   displayName String
   data      Bytes? @db.ByteA

@@ -1,5 +1,7 @@
 const React = require("react");
 const {useState, useEffect} = require("react")
+const {Cross2Icon} = require("@radix-ui/react-icons")
+const AddProductButton = require("./AddProductButton.js").default;
 
 export default function ProductFiles() {
     const [columns, setColumns] = useState([]);
@@ -30,35 +32,35 @@ export default function ProductFiles() {
         updateProduct()
     }
 
-    useEffect(() => {
-        const getMappings = async () => {
-            const response = await fetch("/api/mappings")
-            const data = await response.json()
-            console.log("mappings: ", data)
-            let cols = ['Product Name', ...data.files.map(file => file.name)]
-            setColumns (cols)
-            let tempfileIds = {}
-            data.files.forEach(file => {
-                tempfileIds[file.name] = file.id
+    const getMappings = async () => {
+        const response = await fetch("/api/mappings")
+        const data = await response.json()
+        console.log("mappings: ", data)
+        let cols = ['Product Name', ...data.files.map(file => file.name)]
+        setColumns (cols)
+        let tempfileIds = {}
+        data.files.forEach(file => {
+            tempfileIds[file.name] = file.id
+        })
+        setFileIds(tempfileIds)
+        let prods = data.products.map(product => {
+            let obj = {"Product Name": product.name, "id": product.id}
+            product.ProductFiles.forEach(file => {
+                obj[file.file.name] = file.displayName
             })
-            setFileIds(tempfileIds)
-            let prods = data.products.map(product => {
-                let obj = {"Product Name": product.name, "id": product.id}
-                product.ProductFiles.forEach(file => {
-                    obj[file.file.name] = file.displayName
-                })
-                return obj
-            })
-            console.log("prods: ", prods)
-            setData(prods)
-        }
+            return obj
+        })
+        console.log("prods: ", prods)
+        setData(prods)
+    }
 
+    useEffect(() => {
         getMappings()
     }, [])
 
     return (
         <div className="w-full min-w-[450px] ">
-            <h1 className="font-bold mb-2 text-2xl">Files</h1>
+            <h1 className="font-bold mb-2 text-2xl">Products and Files</h1>
             <div className="flex w-full gap-2 mb-2 text-center">
                 {columns.map((column, index) => (
                     <div 
@@ -73,6 +75,8 @@ export default function ProductFiles() {
             {data.map((row, index) => (
                 <MappingRule fileIds={fileIds} row={row} columns={columns} rowIndex={index} handleChange={handleChange} key={index} />
             ))}
+
+            <AddProductButton getProducts={getMappings}/>
 
 
         </div>
@@ -100,6 +104,12 @@ function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
     const [tempValue, setTempValue] = useState(row[column]);
     const [tempFile, setTempFile] = useState(null);
 
+    useEffect(() => {
+        if (!tempValue || tempValue == null) {
+            setEditing(true)
+        }
+    }, [tempValue])
+
     const savePDF = async (arrayBuffer) => {
         let blob = new Blob([arrayBuffer], {type: 'application/pdf'});
         const formData = new FormData();
@@ -120,8 +130,14 @@ function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
         }
     }
 
+    const deleteProduct = async () => {
+        let response = await fetch(`/api/product?id=${row.id}`, {
+            method: 'DELETE'
+        })
+    }
+
     return (
-        <div className="bg-white p-2 w-[300px] grow rounded-lg flex justify-between">
+        <div className="bg-white p-2 px-4 w-[300px] grow rounded-lg flex justify-between items-center">
                     
                     {editing && colIndex == 0? 
                     <input 
@@ -136,6 +152,7 @@ function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
                     type="file"
                     className="w-[90%] bg-gray-200 px-1 rounded-md px-2"
                     name={column}
+                    placeholder={tempValue}
                     onChange={async (e)=>{
                         setTempValue(e.target.files[0].name)
                         setTempFile(await e.target.files[0].arrayBuffer())
@@ -144,31 +161,68 @@ function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
                     }
                     }/> 
                     
-                    : row[column]}
+                    : colIndex == 0 ? row[column] 
                     
-                    {editing && 
-                    <span className="cursor-pointer font-bold text-blue-600 ml-2"
-                    onClick={() => setEditing(!editing)}>
-                    Cancel
-                    </span>
+                    :   <button
+                        className="text-blue-600 underline" 
+                        onClick={async ()=>{
+                            try {
+                                let response = await fetch(`/api/productfile?productId=${row.id}&fileId=${fileIds[column]}`);
+                    
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                    
+                                const blob = await response.blob();
+                                const url = window.URL.createObjectURL(blob);
+                                
+                                // Open the PDF in a new browser tab
+                                window.open(url, '_blank');
+                    
+                                // Optional: Clean up the URL object
+                                window.URL.revokeObjectURL(url);
+                            } catch (error) {
+                                console.error('Error fetching the PDF:', error);
+                                // Handle the error (e.g., show an error message)
+                            }
+                    
+                        }}>
+                            {row[column]}
+                        </button>
                     }
+                    
+                    <span className="flex items-center">
+                        {editing && 
+                        <span className="cursor-pointer font-bold text-blue-600 ml-2"
+                        onClick={() => setEditing(!editing)}>
+                        Cancel
+                        </span>
+                        }
 
-                    <span 
-                    className="cursor-pointer font-bold text-blue-600 ml-2"
-                    onClick={() => {
-                        if (editing && colIndex == 0) {
-                            handleChange(column, tempValue);
-                            setEditing(!editing)
-                        } else if (editing && colIndex > 0) {
-                            // hit api
-                            savePDF(tempFile)
-                        } else {
-                            setEditing(!editing)
-                        }
-                        }
-                        }>
-                        {editing ? 'Save' : 'Edit'}
+                        <span 
+                            className="cursor-pointer font-bold text-blue-600 ml-2"
+                            onClick={() => {
+                                if (editing && colIndex == 0) {
+                                    handleChange(column, tempValue);
+                                    setEditing(!editing)
+                                } else if (editing && colIndex > 0) {
+                                    // hit api
+                                    savePDF(tempFile)
+                                } else {
+                                    setEditing(!editing)
+                                }
+                            }
+                            }>
+                            {editing ? 'Save' : 'Edit'}
+                        </span>
+
+                        {colIndex == 0 && 
+                        <Cross2Icon 
+                        onClick={deleteProduct}
+                        className='w-5 h-5 p-1 m-1 rounded-lg hover:cursor-pointer hover:bg-gray-300' />}
+
                     </span>
+                    
 
                     
                 

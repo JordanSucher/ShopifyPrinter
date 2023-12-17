@@ -14,6 +14,38 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'dist/index.html'))
 })
 
+app.get('/api/productfile', async (req, res) => {
+    try {
+        let productId = parseInt(req.query.productId);
+        let fileId = parseInt(req.query.fileId);
+
+        let productFile = await prisma.ProductFile.findUnique({
+            where: {
+                productId_fileId: {
+                    productId: productId,
+                    fileId: fileId
+                }
+            }
+        });
+
+        if (!productFile || !productFile.data) {
+            return res.status(404).send('File not found');
+        }
+
+        const fileBuffer = Buffer.from(productFile.data);
+
+        // Set headers
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename="download.pdf"');
+
+        // Send the file
+        res.send(fileBuffer);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error retrieving the file');
+    }
+});
+
 app.post('/api/productfile', (req, res) => {
     console.log("req.body: ", req.body)
     let productId;
@@ -119,6 +151,25 @@ app.post('/api/printer', async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500).send('Error saving printer');
+    }
+})
+
+app.delete('/api/product', async (req, res) => {
+    // get from url params
+    let productId = req.query.id
+    console.log("productId: ", productId)
+
+    try {
+        let product = await prisma.product.delete({
+            where: {
+                id: parseInt(productId)
+            }
+        })
+        res.json({success: true})
+    }
+    catch (error) {
+        console.log(error)
+        res.status(500).send('Error deleting product');
     }
 })
 
