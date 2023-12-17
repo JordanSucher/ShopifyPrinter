@@ -1,0 +1,57 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id    Int @id @default(autoincrement())
+  name  String
+  ProductFiles ProductFile[]
+}
+
+model File {
+  id    Int @id @default(autoincrement())
+  name  String
+  printerId Int?
+  printer Printer? @relation(fields: [printerId], references: [id])
+  ProductFiles ProductFile[]
+}
+
+model ProductFile {
+  productId Int
+  fileId    Int
+  product   Product @relation(fields: [productId], references: [id])
+  file      File @relation(fields: [fileId], references: [id]) 
+  displayName String
+  data      Bytes? @db.ByteA
+  @@id([productId, fileId])
+}
+
+
+model Printer {
+  id        Int @id @default(autoincrement())
+  name      String
+  files     File[]
+}
+
+model PrintJob {
+  id        Int @id @default(autoincrement())
+  productName   String
+  OrderId       Int
+  Status        Status @default(PENDING)
+  CreatedAt     DateTime
+  UpdatedAt     DateTime
+}
+
+enum Status {
+  PENDING
+  PRINTING
+  DONE
+}

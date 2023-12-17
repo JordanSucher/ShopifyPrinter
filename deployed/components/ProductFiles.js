@@ -1,22 +1,68 @@
 const React = require("react");
 const {useState, useEffect} = require("react")
 
-export default function MappingRules() {
-    const [columns, setColumns] = useState(['Product Name', 'Cover PDF', 'Book PDF']);
-    const [data, setData] = useState([{"Product Name": 'Book 1', "Cover PDF": 'cover1.pdf', "Book PDF": 'book1.pdf'}, {"Product Name": 'Book 2', "Cover PDF": 'cover2.pdf', "Book PDF": 'book2.pdf'}]);
+export default function ProductFiles() {
+    const [columns, setColumns] = useState([]);
+    const [data, setData] = useState([]);
+    const [fileIds, setFileIds] = useState({});
 
     const handleChange = (column, value, index) => {
         let newRows = [...data];
+        let productId = newRows[index].id
         newRows[index][column] = value;
         setData(newRows)
+
+        const updateProduct = async () => {
+            const response = await fetch(`/api/product`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: productId,
+                    name: value
+                })
+            })
+
+            const data = await response.json()
+            console.log(data)
+        }
+        updateProduct()
     }
 
+    useEffect(() => {
+        const getMappings = async () => {
+            const response = await fetch("/api/mappings")
+            const data = await response.json()
+            console.log("mappings: ", data)
+            let cols = ['Product Name', ...data.files.map(file => file.name)]
+            setColumns (cols)
+            let tempfileIds = {}
+            data.files.forEach(file => {
+                tempfileIds[file.name] = file.id
+            })
+            setFileIds(tempfileIds)
+            let prods = data.products.map(product => {
+                let obj = {"Product Name": product.name, "id": product.id}
+                product.ProductFiles.forEach(file => {
+                    obj[file.file.name] = file.displayName
+                })
+                return obj
+            })
+            console.log("prods: ", prods)
+            setData(prods)
+        }
+
+        getMappings()
+    }, [])
+
     return (
-        <div className="w-full">
-            <div className="flex w-full gap-2 mb-2">
+        <div className="w-full min-w-[450px] ">
+            <h1 className="font-bold mb-2 text-2xl">Files</h1>
+            <div className="flex w-full gap-2 mb-2 text-center">
                 {columns.map((column, index) => (
                     <div 
-                    className="border-2 border-black p-2 w-[300px] rounded-lg font-bold"
+                    className="bg-white p-2 w-[300px] grow rounded-lg font-bold"
                     key={index}>
                     
                         {column}
@@ -25,7 +71,7 @@ export default function MappingRules() {
             </div>
 
             {data.map((row, index) => (
-                <MappingRule row={row} columns={columns} rowIndex={index} handleChange={handleChange} key={index} />
+                <MappingRule fileIds={fileIds} row={row} columns={columns} rowIndex={index} handleChange={handleChange} key={index} />
             ))}
 
 
@@ -33,7 +79,7 @@ export default function MappingRules() {
     )
 }
 
-function MappingRule ({row, columns, rowIndex, handleChange}) {
+function MappingRule ({row, columns, rowIndex, handleChange, fileIds}) {
     useEffect(() => {
         console.log("Row: ", row)
     })
@@ -43,13 +89,13 @@ function MappingRule ({row, columns, rowIndex, handleChange}) {
     return (
         <div className="flex w-full gap-2 mb-2"> 
             {columns.map((column, index) => (
-                <MappingRuleCell row={row} column={column} colIndex={index} handleChange={(column, value) => handleChange(column, value, rowIndex)} />
+                <MappingRuleCell fileIds={fileIds} row={row} column={column} colIndex={index} handleChange={(column, value) => handleChange(column, value, rowIndex)} />
             ))}
         </div>
     )
 }
 
-function MappingRuleCell ({row, column, colIndex, handleChange}) {
+function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
     const [editing, setEditing] = useState(false);
     const [tempValue, setTempValue] = useState(row[column]);
     const [tempFile, setTempFile] = useState(null);
@@ -58,8 +104,10 @@ function MappingRuleCell ({row, column, colIndex, handleChange}) {
         let blob = new Blob([arrayBuffer], {type: 'application/pdf'});
         const formData = new FormData();
         formData.append('file', blob, tempValue);
+        formData.append('productId', row.id);
+        formData.append('fileId', fileIds[column]);
 
-        let response = await fetch('/api/file', {
+        let response = await fetch('/api/productfile', {
             method: 'POST',
             body: formData,
         })
@@ -73,7 +121,7 @@ function MappingRuleCell ({row, column, colIndex, handleChange}) {
     }
 
     return (
-        <div className="border-2 border-black p-2 w-[300px] rounded-lg flex justify-between">
+        <div className="bg-white p-2 w-[300px] grow rounded-lg flex justify-between">
                     
                     {editing && colIndex == 0? 
                     <input 
@@ -98,6 +146,13 @@ function MappingRuleCell ({row, column, colIndex, handleChange}) {
                     
                     : row[column]}
                     
+                    {editing && 
+                    <span className="cursor-pointer font-bold text-blue-600 ml-2"
+                    onClick={() => setEditing(!editing)}>
+                    Cancel
+                    </span>
+                    }
+
                     <span 
                     className="cursor-pointer font-bold text-blue-600 ml-2"
                     onClick={() => {
@@ -114,6 +169,8 @@ function MappingRuleCell ({row, column, colIndex, handleChange}) {
                         }>
                         {editing ? 'Save' : 'Edit'}
                     </span>
+
+                    
                 
                 </div>
     )
