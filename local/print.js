@@ -90,6 +90,8 @@ async function pullSomeOffTheQueue(howmany) {
     })
 
     // get the relevant filePaths
+    console.log("items: ", items.map(item => item.productName))
+
     let files = await prisma.product.findMany({
         where: {
             name: {

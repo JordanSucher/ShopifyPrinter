@@ -57,9 +57,9 @@ model PrintJob {
   id           Int      @id @default(autoincrement())
   sku          String
   productName  String
-  lineItemId   Int
-  orderId      Int
-  status       Status   @default(PENDING)
+  lineItemId   String
+  orderId      String
+  status       Status   @default(QUEUED)
   printJobName String?
   createdAt    DateTime
   updatedAt    DateTime

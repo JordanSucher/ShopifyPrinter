@@ -6,9 +6,11 @@ const PrinterMapping = require("./PrinterMapping.js").default;
 
 export default function Main() {
     return (
-        <div className="p-6">
-            <ProductFiles />
-            <PrinterMapping />
+        <div className="mt-4 p-6 text-sm xl:w-2/3 xl:mx-auto">
+            <div className="">
+                <ProductFiles />
+                <PrinterMapping />
+            </div>
             <PrintQueue />
         </div>
     )

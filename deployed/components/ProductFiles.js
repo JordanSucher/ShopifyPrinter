@@ -14,22 +14,26 @@ export default function ProductFiles() {
         newRows[index][column] = value;
         setData(newRows)
 
-        const updateProduct = async () => {
-            const response = await fetch(`/api/product`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    id: productId,
-                    name: value
-                })
-            })
+        console.log("column: ", column)
 
-            const data = await response.json()
-            console.log(data)
+        if(column == "Product Name") {
+            const updateProduct = async () => {
+                const response = await fetch(`/api/product`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: productId,
+                        name: value
+                    })
+                })
+    
+                const data = await response.json()
+                console.log(data)
+            }
+            updateProduct()
         }
-        updateProduct()
     }
 
     const getMappings = async () => {
