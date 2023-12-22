@@ -34,7 +34,7 @@ app.post('/api/orders', async (req, res) => {
                         sku: lineItems[i].sku,
                         productName: lineItems[i].name,
                         lineItemId: lineItems[i].id,
-                        orderId: order.id,
+                        OrderId: order.id,
                         createdAt: new Date(),
                         updatedAt: new Date()
                     }
