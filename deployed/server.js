@@ -29,12 +29,12 @@ app.post('/api/orders', async (req, res) => {
     
             if (lineItems[i]["requires_shipping"] == 'true' || lineItems[i]["requires_shipping"] == true) {
                     console.log("starting order processing")
-                    console.log("lineItemId: ", lineItems[i].id)
+                    console.log("lineItemId: ", lineItems[i]["id"])
 
                     const data = {
                         sku: lineItems[i].sku,
                         productName: lineItems[i].name,
-                        lineItemId: toString(lineItems[i].id),
+                        lineItemId: toString(lineItems[i]["id"]),
                         orderId: toString(order.id),
                         createdAt: new Date(),
                         updatedAt: new Date()
