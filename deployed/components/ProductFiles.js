@@ -63,7 +63,7 @@ export default function ProductFiles() {
     }, [])
 
     return (
-        <div className="w-full min-w-[450px] ">
+        <div className="w-full min-w-[450px] text-2xs sm:text-sm ">
             <h1 className="font-bold mb-2 text-2xl">Products and Files</h1>
             <div className="flex w-full gap-2 mb-2 text-center">
                 {columns.map((column, index) => (

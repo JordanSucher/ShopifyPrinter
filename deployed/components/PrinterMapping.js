@@ -45,8 +45,8 @@ export default function PrinterMapping() {
             <div className="flex w-full gap-2 flex-col mb-2">
                 {printers.map(printer => (
                     <span key={printer.id} className="flex grow items-center">
-                        <div key={printer.id} className="flex grow bg-white p-4 rounded-lg justify-between items-center min-w-[400px]">
-                            <p className="font-bold min-w-[250px]">{printer.name}</p>
+                        <div key={printer.id} className="flex flex-row grow bg-white p-4 rounded-lg justify-between items-center min-w-[400px]">
+                            <p className="font-bold w-1/3 mr-2 text-xs sm:text-sm">{printer.name}</p>
                             <div className="flex flex-col gap-2 w-1/3">
                                 {printer.files.length > 0 && <p className="font-bold">Files attached to this printer: </p>}
                                 <span className="flex flex-wrap gap-2">

@@ -123,7 +123,7 @@ export default function PrintQueue() {
                 },
                 }}/>
             </span>
-            <table>
+            <table className="text-xs sm:text-sm">
                 <thead>
                     <tr>
                         <th>
