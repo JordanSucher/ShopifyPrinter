@@ -29,6 +29,7 @@ app.post('/api/orders', async (req, res) => {
     
             if (lineItems[i]["requires_shipping"] == 'true' || lineItems[i]["requires_shipping"] == true) {
                     console.log("starting order processing")
+                    console.log("lineItemId: ", lineItems[i].id)
 
                     const data = {
                         sku: lineItems[i].sku,
