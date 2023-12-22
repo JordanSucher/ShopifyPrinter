@@ -31,12 +31,12 @@ app.post('/api/orders', async (req, res) => {
                     console.log("starting order processing")
 
                     const data = {
-                        sku: lineItems[i].sku,
-                        productName: lineItems[i].name,
-                        lineItemId: lineItems[i].id,
+                        Sku: lineItems[i].sku,
+                        ProductName: lineItems[i].name,
+                        LineItemId: lineItems[i].id,
                         OrderId: order.id,
-                        createdAt: new Date(),
-                        updatedAt: new Date()
+                        CreatedAt: new Date(),
+                        UpdatedAt: new Date()
                     }
 
                     console.log("data for print job", data)
