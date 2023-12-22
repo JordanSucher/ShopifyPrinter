@@ -17,6 +17,10 @@ export default function PrintQueue() {
         setPaginatedQueue(queue.slice((page - 1) * 25, page * 25))
     }, [queue, page])
 
+    useEffect(() => {
+        setAllChecked(false)
+    }, [page])
+
     const getQueue = async () => {
         const response = await fetch("/api/queue")
         const data = await response.json()
@@ -61,7 +65,7 @@ export default function PrintQueue() {
 
     const toggleAll = (bool) => {
         let newChecked = {}
-        queue.forEach((item) => {
+        paginatedQueue.forEach((item) => {
             newChecked[item.id] = bool
         })
         setChecked(newChecked)

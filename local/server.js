@@ -4,6 +4,10 @@ const { exec } = require('child_process');
 const cors = require('cors');
 const os = require('os');
 const { createClient } = require('@supabase/supabase-js');
+const dotenv = require('dotenv');
+
+dotenv.config();
+
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);

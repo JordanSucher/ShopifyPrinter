@@ -354,6 +354,8 @@ function printPDF(printerName, pdfPath) {
 function startPolling(interval = 3000) {
     setInterval(pollQueue, interval);
     setInterval(pollPrintingQueue, interval);
+
+    console.log('Polling started!')
 }
 
 
