@@ -33,8 +33,8 @@ app.post('/api/orders', async (req, res) => {
                     const data = {
                         sku: lineItems[i].sku,
                         productName: lineItems[i].name,
-                        lineItemId: lineItems[i].id,
-                        orderId: order.id,
+                        lineItemId: toString(lineItems[i].id),
+                        orderId: toString(order.id),
                         createdAt: new Date(),
                         updatedAt: new Date()
                     }
