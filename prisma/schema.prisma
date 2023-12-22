@@ -59,13 +59,14 @@ model PrintJob {
   productName  String
   lineItemId   String
   orderId      String
-  status       Status   @default(QUEUED)
+  status       Status   @default(NONE)
   printJobName String?
   createdAt    DateTime
   updatedAt    DateTime
 }
 
 enum Status {
+  NONE
   QUEUED
   PENDING
   PRINTING

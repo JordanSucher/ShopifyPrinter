@@ -1,10 +1,25 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { printPDF, getLocalFilePath, pullSomeOffTheQueue } = require('./print');
 const { exec } = require('child_process');
 const cors = require('cors');
 const os = require('os');
+const { createClient } = require('@supabase/supabase-js');
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
+const { localQueue } = require('./poller.js');
+
+supabase
+    .channel('schema-db-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'PrintJob' }, (payload) => {
+        console.log('Change received!', payload);
+        // when a job is updated to QUEUED, add it to localQueue
+        if (payload.new.status == 'QUEUED') {
+            localQueue.push(payload.new)
+        }
+    })
+    .subscribe();
 
 
 const app = express();
@@ -47,8 +62,8 @@ app.get('/printers', (req, res) => {
                 result.push(match[1]); // match[1] is the captured group with the printer name
             }
     
-            console.log(stdout); // Full output
-            console.log(result); // Extracted printer names
+            // console.log(stdout); // Full output
+            // console.log(result); // Extracted printer names
             res.send(result); // Send the result back in response
         });
 
@@ -57,24 +72,5 @@ app.get('/printers', (req, res) => {
     }
 })
 
-app.post('/print', async (req, res) => {
-    const { howmany } = req.body;    
-    
-    try {
-        pullSomeOffTheQueue(howmany);
-        res.send('Print job has been sent.');
-    } catch (error) {
-        res.status(500).send('Error processing the print job');
-    }
-});
 
-
-app.get('/printjobstatuses', async (req, res) => {
-
-    res.send('Print job statuses');
-})
-
-const port = 3001;
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+module.exports = app

@@ -169,6 +169,63 @@ app.post('/api/productfile', (req, res) => {
 
 })
 
+app.post('/api/print', async (req, res) => {
+    let howmany = req.body.howmany
+    let ids = req.body.ids
+
+    try {
+    
+        if (howmany && howmany > 0) {
+            // that many off the queue get flipped to QUEUED
+            let jobs = await prisma.PrintJob.findMany({
+                where: {
+                    status: 'NONE'
+                },
+                orderBy: {
+                    createdAt: 'asc'
+                },
+                take: parseInt(howmany)
+            })
+        
+            await prisma.PrintJob.updateMany({
+                where: {
+                    id: {
+                        in: jobs.map(job => job.id)
+                    }
+                },
+                data: {
+                    status: 'QUEUED'
+                }
+            })
+        
+            res.json({success: true})
+        }
+
+        else {
+            // all ids get flipped to QUEUED
+            ids = ids.map(id => parseInt(id))
+
+            await prisma.PrintJob.updateMany({
+                where: {
+                    id: {
+                        in: ids
+                    }
+                },
+                data: {
+                    status: 'QUEUED'
+                }
+            })
+
+            res.json({success: true})
+        }
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error printing');
+    }
+
+})
+
 app.post('/api/printer', async (req, res) => {
     let printerId = req.body.id
     let printerName = req.body.name
@@ -281,9 +338,52 @@ app.post('/api/product', async (req, res) => {
     }
 })
 
+app.post('/api/removefromqueue', async (req, res) => {
+    let ids = req.body.ids
+    ids = ids.map(id => parseInt(id))
+    try {
+        await prisma.printJob.deleteMany({
+            where: {
+                id: {
+                    in: ids
+                }
+            }
+        })
+        res.json({success: true})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error removing from queue');
+    }
+})
+
 app.get('/api/queue', async (req, res) => {
     try{ 
-        let queue = await prisma.printJob.findMany()
+
+        const oneDayAgo = new Date(new Date().setDate(new Date().getDate() - 1));
+
+
+        let queue = await prisma.printJob.findMany({
+            where: {
+                NOT: [
+                    {
+                        AND: [
+                            {
+                                status: 'DONE',
+                            },
+                            {
+                                updatedAt: {
+                                    lt: oneDayAgo,
+                                },
+                            },
+                        ],
+                    },
+                ],
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        });
+    
         res.json(queue)
     } catch (error) {
         console.log(error)
