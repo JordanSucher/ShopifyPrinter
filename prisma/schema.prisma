@@ -11,48 +11,62 @@ datasource db {
 }
 
 model Product {
-  id    Int @id @default(autoincrement())
-  name  String
+  id           Int           @id @default(autoincrement())
+  name         String
   ProductFiles ProductFile[]
 }
 
 model File {
-  id    Int @id @default(autoincrement())
-  name  String
-  printerId Int?
-  printer Printer? @relation(fields: [printerId], references: [id])
-  ProductFiles ProductFile[]
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  latestPrinterUsedId Int?
+  printers            FilePrinterMappings[]
+  ProductFiles        ProductFile[]
+  latestPrinterUsed   Printer?               @relation(fields: [latestPrinterUsedId], references: [id])
 }
 
 model ProductFile {
-  productId Int
-  fileId    Int
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  file      File @relation(fields: [fileId], references: [id]) 
-  displayName String
-  data      Bytes? @db.ByteA
+  productId     Int
+  fileId        Int
+  product       Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  file          File    @relation(fields: [fileId], references: [id])
+  displayName   String
+  localFilePath String?
+  data          Bytes?  @db.ByteA
+
   @@id([productId, fileId])
 }
 
-
 model Printer {
-  id        Int @id @default(autoincrement())
-  name      String
-  files     File[]
+  id               Int                   @id @default(autoincrement())
+  name             String
+  files            FilePrinterMappings[]
+  filesTouchedLast File[]
+}
+
+model FilePrinterMappings {
+  fileId    Int
+  printerId Int
+  file      File    @relation(fields: [fileId], references: [id])
+  printer   Printer @relation(fields: [printerId], references: [id], onDelete: Cascade)
+
+  @@id([fileId, printerId])
 }
 
 model PrintJob {
-  id        Int @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   sku          String
-  productName   String
-  lineItemId    Int
-  orderId       Int
-  status        Status @default(PENDING)
-  createdAt     DateTime
-  updatedAt     DateTime
+  productName  String
+  lineItemId   Int
+  orderId      Int
+  status       Status   @default(PENDING)
+  printJobName String?
+  createdAt    DateTime
+  updatedAt    DateTime
 }
 
 enum Status {
+  QUEUED
   PENDING
   PRINTING
   DONE

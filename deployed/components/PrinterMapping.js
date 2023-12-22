@@ -10,15 +10,8 @@ export default function PrinterMapping() {
 
     const handleUnassign = async (e, printer, file) => {
         // unassign file
-        const response = await fetch(`/api/printermapping`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                fileId: file.id,
-                printerId: null
-            })
+        const response = await fetch(`/api/printermapping?fileId=${file.id}&printerId=${printer.id}`, {
+            method: 'DELETE',
         })
 
         getPrinters()
@@ -38,6 +31,7 @@ export default function PrinterMapping() {
     const getPrinters = async () => {
         const response = await fetch("/api/printers")
         const data = await response.json()
+        console.log("printers: ", data)
         setPrinters(data)
     }
 
@@ -52,14 +46,14 @@ export default function PrinterMapping() {
                 {printers.map(printer => (
                     <span key={printer.id} className="flex grow items-center">
                         <div key={printer.id} className="flex grow bg-white p-4 rounded-lg justify-between items-center min-w-[400px]">
-                            <p className="font-bold">{printer.name}</p>
+                            <p className="font-bold min-w-[250px]">{printer.name}</p>
                             <div className="flex flex-wrap items-center gap-2">
                                 {printer.files.length > 0 && <p className="font-bold">Files attached to this printer: </p>}
                                 {printer.files.map(file => (
                                     <span className="flex justify-center items-center bg-blue-300 px-2 py-1 gap-2 rounded-full">
-                                        <p className="ml-2" key={file.id}>{file.name}</p>
+                                        <p className="ml-2" key={file.file.id}>{file.file.name}</p>
                                         <Cross2Icon className='w-5 h-5 p-1 rounded-full hover:cursor-pointer hover:bg-blue-400' 
-                                        onClick={(e)=>handleUnassign(e, printer, file)}/>
+                                        onClick={(e)=>handleUnassign(e, printer, file.file)}/>
                                     </span>
                                 ))}
                                 {/* <button className="SmallButton">Attach File</button> */}
@@ -74,7 +68,7 @@ export default function PrinterMapping() {
                     </span>
                 ))}
             </div>
-            <AddPrinterButton getPrinters={getPrinters}/>
+            <AddPrinterButton getPrinters={getPrinters} printers={printers}/>
             
         </div>
     )

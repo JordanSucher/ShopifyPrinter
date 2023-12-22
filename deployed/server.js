@@ -135,7 +135,8 @@ app.post('/api/productfile', (req, res) => {
                             }
                         },
                         data: {
-                            data: pdfBuffer
+                            data: pdfBuffer,
+                            localFilePath: null
                         }
                     })
                 }
@@ -238,7 +239,11 @@ app.delete('/api/printer', async (req, res) => {
 app.get('/api/printers', async (req, res) => {
     let printers = await prisma.printer.findMany({
         include: {
-            files: true
+            files: {
+                include: {
+                    file: true
+                }
+            }
         }
     })
     res.json(printers)
@@ -276,6 +281,36 @@ app.post('/api/product', async (req, res) => {
     }
 })
 
+app.get('/api/queue', async (req, res) => {
+    try{ 
+        let queue = await prisma.printJob.findMany()
+        res.json(queue)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error getting queue');
+    }
+})
+
+app.delete('/api/printermapping', async (req, res) => {
+    let fileId = req.query.fileId
+    let printerId = req.query.printerId
+
+    try {
+        await prisma.FilePrinterMappings.delete({
+            where: {
+                fileId_printerId: {
+                    fileId: parseInt(fileId),
+                    printerId: parseInt(printerId)
+                }
+            }
+        })
+        res.json({success: true})
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error deleting printer mapping');
+    }
+})
+
 app.post('/api/printermapping', async (req, res) => {
     let fileId = req.body.fileId
     let printerId = req.body.printerId
@@ -294,14 +329,25 @@ app.post('/api/printermapping', async (req, res) => {
                 }
             })
         } else {
+
+            await prisma.FilePrinterMappings.create({
+                data: {
+                    fileId: parseInt(fileId),
+                    printerId: parseInt(printerId)
+                }
+            })
+
             file = await prisma.file.update({
                 where: {
                     id: parseInt(fileId)
                 },
                 data: {
-                    printer: {
+                    printers: {
                         connect: {
-                            id: parseInt(printerId)
+                            fileId_printerId: {
+                                fileId: parseInt(fileId),
+                                printerId: parseInt(printerId)
+                            }
                         }
                     }
                 }
@@ -320,7 +366,7 @@ app.get('/api/files', async (req, res) => {
 
     const files = await prisma.file.findMany({
         include: {
-            printer: true
+            printers: true
         }
     })
     res.json(files)
@@ -341,7 +387,7 @@ app.get('/api/mappings', async (req, res) => {
     const files = await prisma.file.findMany({
         include: {
             ProductFiles: true,
-            printer: true
+            printers: true
         }
     })
 

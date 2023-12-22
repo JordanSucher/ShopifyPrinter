@@ -73,7 +73,7 @@ export default function ProductFiles() {
             </div>
 
             {data.map((row, index) => (
-                <MappingRule fileIds={fileIds} row={row} columns={columns} rowIndex={index} handleChange={handleChange} key={index} />
+                <MappingRule fileIds={fileIds} row={row} columns={columns} rowIndex={index} handleChange={handleChange} getProducts={getMappings} key={index} />
             ))}
 
             <AddProductButton getProducts={getMappings}/>
@@ -83,7 +83,7 @@ export default function ProductFiles() {
     )
 }
 
-function MappingRule ({row, columns, rowIndex, handleChange, fileIds}) {
+function MappingRule ({row, columns, rowIndex, handleChange, fileIds, getProducts}) {
     useEffect(() => {
         console.log("Row: ", row)
     })
@@ -93,13 +93,13 @@ function MappingRule ({row, columns, rowIndex, handleChange, fileIds}) {
     return (
         <div className="flex w-full gap-2 mb-2"> 
             {columns.map((column, index) => (
-                <MappingRuleCell fileIds={fileIds} row={row} column={column} colIndex={index} handleChange={(column, value) => handleChange(column, value, rowIndex)} />
+                <MappingRuleCell fileIds={fileIds} row={row} column={column} colIndex={index} getProducts={getProducts} handleChange={(column, value) => handleChange(column, value, rowIndex)} />
             ))}
         </div>
     )
 }
 
-function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
+function MappingRuleCell ({row, column, colIndex, handleChange, fileIds, getProducts}) {
     const [editing, setEditing] = useState(false);
     const [tempValue, setTempValue] = useState(row[column]);
     const [tempFile, setTempFile] = useState(null);
@@ -134,6 +134,8 @@ function MappingRuleCell ({row, column, colIndex, handleChange, fileIds}) {
         let response = await fetch(`/api/product?id=${row.id}`, {
             method: 'DELETE'
         })
+
+        getProducts()
     }
 
     return (

@@ -3,23 +3,31 @@ const {useState, useEffect} = require("react")
 
 export default function PrintQueue() {
     const [printContinuously, setPrintContinuously] = useState(false);
+    const [queue, setQueue] = useState([]);
 
-    const [data, setData] = useState([{
-        id: 1,
-        order_id: 1,
-        product_name: "Product 1",
-        status: "pending",
-        created_at: "2022-01-01",
-        updated_at: "2022-01-01"
-    }, {
-        id: 2,
-        order_id: 2,
-        product_name: "Product 2",
-        status: "pending",
-        created_at: "2022-01-01",
-        updated_at: "2022-01-01"
-    }]);
+    useEffect(() => {
+        const getQueue = async () => {
+            const response = await fetch("/api/queue")
+            const data = await response.json()
+            setQueue(data)
+            console.log("queue: ", data)
+        }
+        getQueue()
+    }, [])
 
+
+    const testPrint = async () => {
+        console.log("test print")
+        await fetch('http://localhost:3001/print', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                'printerName': 'Test Printer'
+            })
+        })
+    }
 
 
     return (
@@ -37,14 +45,14 @@ export default function PrintQueue() {
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((item) => (
+                    {queue.map((item) => (
                         <tr key={item.id}>
                             <td>{item.id}</td>
-                            <td>{item.order_id}</td>
-                            <td>{item.product_name}</td>
+                            <td>{item.orderId}</td>
+                            <td>{item.productName}</td>
                             <td>{item.status}</td>
-                            <td>{item.created_at}</td>
-                            <td>{item.updated_at}</td>
+                            <td>{item.createdAt}</td>
+                            <td>{item.updatedAt}</td>
                         </tr>
                     ))}
                 </tbody>
@@ -66,6 +74,11 @@ export default function PrintQueue() {
                 className='SmallButton'>
                     Stop Printing
                 </button> }
+{/* 
+                <button
+                className='SmallButton'>
+                    Test Print
+                </button> */}
 
             </div>
 

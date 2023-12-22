@@ -3,10 +3,29 @@ const { useState, useEffect } = require("react");
 const Dialog = require("@radix-ui/react-dialog");
 const { Cross2Icon } = require("@radix-ui/react-icons");
 
-export default function AddPrinterButton ({getPrinters}) {
+export default function AddPrinterButton ({getPrinters, printers}) {
     const [formError, setFormError] = useState(false)
     const [open, setOpen] = useState(false)
+    const [localPrinters, setLocalPrinters] = useState([])
 
+    const getLocalPrinters = async () => {
+        let localps = await fetch('http://localhost:3001/printers', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+
+        localps = await localps.json()    
+        localps = localps.filter((printer) => !printers.map(p=>p.name).includes(printer))
+        console.log("localprinters: ", localps)
+        console.log("printers",printers)
+        setLocalPrinters(localps)
+    }
+    
+    useEffect(()=>{
+        getLocalPrinters()
+    }, [printers])
 
 
     async function handleSubmit(e) {
@@ -25,6 +44,7 @@ export default function AddPrinterButton ({getPrinters}) {
         })
        
         getPrinters()
+        getLocalPrinters()
 
         setFormError(false)
         setOpen(false)
@@ -50,7 +70,11 @@ export default function AddPrinterButton ({getPrinters}) {
                     <form className='flex flex-col items-start gap-2 my-3' onSubmit={handleSubmit}>
                         <label className=''>
                             <span className='self-start'>Printer Name</span>
-                            <input type="text" name="name" className='input ml-2 border-2 border-gray-500 rounded-md' />
+                            <select name="name" className='input ml-2 border-2 border-gray-500 rounded-md'>
+                                {localPrinters.map((printer) => (
+                                    <option key={printer} value={printer}>{printer}</option>
+                                ))}
+                            </select>
                         </label>
                         <input type="submit" value="Submit" className='SmallButton'/>
                     </form> 
