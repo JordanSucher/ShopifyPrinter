@@ -24,10 +24,10 @@ app.post('/api/orders', async (req, res) => {
 
     try {
         for (let i = 0; i < lineItems.length; i++) {
-            console.log("Requires shipping?", lineItems[i]["requires_shipping"], eval(lineItems[i]["requires_shipping"]) == 'true')
+            console.log("Requires shipping?", lineItems[i]["requires_shipping"], lineItems[i]["requires_shipping"] == 'true' || lineItems[i]["requires_shipping"] == true)
 
     
-            if (lineItems[i]["requires_shipping"] == 'true') {
+            if (lineItems[i]["requires_shipping"] == 'true' || lineItems[i]["requires_shipping"] == true) {
                     console.log("starting order processing")
 
                     const data = {
